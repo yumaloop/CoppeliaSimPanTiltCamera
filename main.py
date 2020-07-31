@@ -15,6 +15,7 @@ import time
 import math
 import random
 import numpy as np
+from operator import add
 import matplotlib.pyplot as plt
 import sim
 
@@ -36,7 +37,14 @@ def remoteAPI_InitTest(clientID):
             sys.exit("Could not connect")
 
 
-def execute_simulation(clientID):
+def move(clientID, targetHandle):
+    ret = sim.simxSetObjectPosition(
+        clientID, target, -1, (0.1, 0.2, 0.005), sim.simx_opmode_oneshot
+    )
+    pass
+
+
+def run_simulation(clientID):
     """
     """
     # http://www.coppeliarobotics.com/helpFiles/en/remoteApiFunctionsPython.htm#simxGetObjectHandle
@@ -46,11 +54,19 @@ def execute_simulation(clientID):
     ret2, joint_pitch = sim.simxGetObjectHandle(
         clientID, "joint_pitch", sim.simx_opmode_blocking
     )
-    if not ret1 == 0 and ret2 == 0:
+    ret3, vision_sensor = sim.simxGetObjectHandle(
+        clientID, "vision_sensor", sim.simx_opmode_blocking
+    )
+    ret4, target = sim.simxGetObjectHandle(clientID, "target", sim.simx_opmode_blocking)
+
+    if not ret1 == 0 and ret2 == 0 and ret3 == 0 and ret4 == 0 and ret5 == 0:
         sys.exit("Could not get object handles.")
 
     # Start simulation
     sim.simxStartSimulation(clientID, sim.simx_opmode_oneshot)
+    time.sleep(1)
+
+    target_pos = (0, 0, 0)
 
     for j in range(100):
         print(f"[{j}]")
@@ -75,7 +91,25 @@ def execute_simulation(clientID):
             clientID, joint_pitch, math.radians(angle_pitch), sim.simx_opmode_oneshot
         )
 
+        # Update target's position
+        diff_pos = (0.05, 0.05, 0.0)
+        target_pos = tuple(map(add, target_pos, diff_pos))
+        ret = sim.simxSetObjectPosition(
+            clientID, target, -1, target_pos, sim.simx_opmode_oneshot
+        )
+
         # Get images from vision sensors
+        ret, resolution, image = sim.simxGetVisionSensorImage(
+            clientID, vision_sensor, 0, sim.simx_opmode_streaming
+        )
+        print("ret", ret, "resolution", resolution, "type(image)", type(image))
+
+        if len(resolution) != 0:
+            img = np.array(image, dtype=np.uint8)
+            img.resize([resolution[0], resolution[1], 3])
+            print("img.shape", img.shape)
+
+        # plt.imshow(img, origin="lower")
         """
         r, resolution, image = sim.simxGetVisionSensorImage(clientID, vision_sensor, 0, sim.simx_opmode_streaming)
         img = np.array(image, dtype = np.uint8)
@@ -114,7 +148,7 @@ def main(
     # Check if clientID is valid
     remoteAPI_InitTest(clientID)
     # Execute simulation loop
-    execute_simulation(clientID)
+    run_simulation(clientID)
     # Now close the connection to CoppeliaSim:
     sim.simxFinish(clientID)
     print("Program ended.")
