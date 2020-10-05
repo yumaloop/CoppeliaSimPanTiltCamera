@@ -85,22 +85,26 @@ def run_simulation(clientID):
 
         # Set new positions
         ret = sim.simxSetJointPosition(
-            clientID, joint_yaw, math.radians(angle_yaw), sim.simx_opmode_oneshot
+            # clientID, joint_yaw, math.radians(angle_yaw), sim.simx_opmode_oneshot
+            clientID, joint_yaw, math.radians(angle_yaw), sim.simx_opmode_blocking
         )
         ret = sim.simxSetJointPosition(
-            clientID, joint_pitch, math.radians(angle_pitch), sim.simx_opmode_oneshot
+            # clientID, joint_pitch, math.radians(angle_pitch), sim.simx_opmode_oneshot
+            clientID, joint_pitch, math.radians(angle_pitch), sim.simx_opmode_blocking
         )
 
         # Update target's position
         diff_pos = (0.05, 0.05, 0.0)
         target_pos = tuple(map(add, target_pos, diff_pos))
         ret = sim.simxSetObjectPosition(
-            clientID, target, -1, target_pos, sim.simx_opmode_oneshot
+            # clientID, target, -1, target_pos, sim.simx_opmode_oneshot
+            clientID, target, -1, target_pos, sim.simx_opmode_blocking
         )
 
         # Get images from vision sensors
         ret, resolution, image = sim.simxGetVisionSensorImage(
-            clientID, vision_sensor, 0, sim.simx_opmode_streaming
+            # clientID, vision_sensor, 0, sim.simx_opmode_streaming
+            clientID, vision_sensor, 0, sim.simx_opmode_blocking
         )
         print("ret", ret, "resolution", resolution, "type(image)", type(image))
 
@@ -116,7 +120,7 @@ def run_simulation(clientID):
         img.resize([resolution[0], resolution[1], 3])
         # plt.imshow(img, origin="lower")
         """
-        time.sleep(2)
+        time.sleep(0.1)
 
     # End simulation
     sim.simxStopSimulation(clientID, opmode)
@@ -136,6 +140,7 @@ def main(
 
     # Connect to CoppeliaSim
     # https://www.coppeliarobotics.com/helpFiles/en/remoteApiFunctionsPython.htm#simxStart
+    # For example, clientID is setted as 0
     clientID = sim.simxStart(
         address,
         port,
@@ -147,10 +152,13 @@ def main(
 
     # Check if clientID is valid
     remoteAPI_InitTest(clientID)
+
     # Execute simulation loop
     run_simulation(clientID)
+    
     # Now close the connection to CoppeliaSim:
     sim.simxFinish(clientID)
+
     print("Program ended.")
 
 
