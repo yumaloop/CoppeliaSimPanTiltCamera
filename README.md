@@ -98,3 +98,21 @@ remoteApi.dylib # DLLファイル(APIの本体)
 ```
 $ python3 simpleTest.py # 通信テストを実行
 ```
+
+### Pantilt Camera simulation
+
+##### Client-side
+
+CoppeliaSimのシーンファイル(.ttt)内でシミュレーションを開始する．
+
+##### Server-side
+
+```
+$ python3 main.py # パンチルトカメラをPythonから制御する．
+```
+
+`main.py`が扱う処理:
+
+- CoppeliaSim(クライアント)内に配置されたパンチルトカメラ(Pan-Tilt Camera, PTZ Camera)の，ズーム，ヨー，ピッチの3つのパラメータをPythonスクリプト(サーバ)上で制御してみる． (サーバ → クライアント)
+- CoppeliaSim(クライアント)内に配置されたパンチルトカメラ(Pan-Tilt Camera, PTZ Camera)の，視覚センサ(Vision sensor)が受け取った画像をPythonスクリプト(サーバ)上で制御してみる． (クライアント → サーバ)
+
