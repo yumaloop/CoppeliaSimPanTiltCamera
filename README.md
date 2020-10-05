@@ -71,11 +71,15 @@ $ make
 Model:「B0 Remote API Server」をSceneにドラッグ&ドロップする．
 Scene直下に「b0RemoteApiServer.lua」というスクリプトが作成される．「b0RemoteApiServer.lua」には以下の記述があり，APIを読み込んでいる．
 
+```
 require('b0RemoteApiServer')
+```
 
 クライアント側から制御したいオブジェクトのchild script(.lua)の1行目に以下を追加する．クライアント側(シミュレータ)は，ポート番号:199999でサーバからの命令受信を行う．)
 
+```
 simRemoteApi.start(19999)
+```
 
 クライアント側と通信したいSceneで，シミュレーションを開始する．
 
